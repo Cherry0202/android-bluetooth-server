@@ -66,10 +66,17 @@ public class MainActivity extends AppCompatActivity {
 				}
 
 				if (socket != null) {
+					try {
+						mInput = socket.getInputStream();
+						Log.d(TAG,"getInputStream呼び出し");
+					} catch (IOException e) {
+						e.printStackTrace();
+						Log.d(TAG,"manageMyConnectedSocket:"+e);
+					}
 					Log.d(TAG,"認証できたよ");
 					// A connection was accepted. Perform work associated with
 					// the connection in a separate thread.
-					manageMyConnectedSocket(socket);
+					manageMyConnectedSocket(mInput);
 					try {
 						mmServerSocket.close();
 					} catch (IOException e) {
@@ -80,15 +87,21 @@ public class MainActivity extends AppCompatActivity {
 			}
 		}
 
-		private void manageMyConnectedSocket(BluetoothSocket socket) {
+		private void manageMyConnectedSocket(InputStream mInput) {
+			// InputStreamのバッファを格納
+			byte[] buffer = new byte[1024];
+			// 取得したバッファのサイズを格納
+			int bytes;
+			// InputStreamの読み込み
 			try {
-				mInput = socket.getInputStream();
-				Log.d(TAG,"getInputStream呼び出し");
+				bytes = mInput.read(buffer);
+				Log.d(TAG,"inputstream読み込み");
+				String msg = new String(buffer, 0, bytes);
+				Log.d(TAG, "manageMyConnectedSocket: "+msg);
 			} catch (IOException e) {
 				e.printStackTrace();
-				Log.d(TAG,"manageMyConnectedSocket:"+e);
+				Log.d(TAG,"読み込み失敗"+e);
 			}
-
 		}
 
 		// Closes the connect socket and causes the thread to finish.
