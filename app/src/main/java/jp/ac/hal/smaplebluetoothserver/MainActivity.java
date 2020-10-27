@@ -60,6 +60,7 @@ public class MainActivity extends AppCompatActivity {
 			while (true) {
 				try {
 					socket = mmServerSocket.accept();
+					Log.d(TAG, "acceptできたよ");
 				} catch (IOException e) {
 					Log.e(TAG, "Socket's accept() method failed", e);
 					break;
