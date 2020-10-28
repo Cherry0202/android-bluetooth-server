@@ -13,10 +13,13 @@ import android.util.Log;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.UUID;
 
 public class MainActivity extends AppCompatActivity {
 	String TAG = "debug";
+
+	private OutputStream mOutput; //出力ストリーム
 
 
 	@Override
@@ -32,6 +35,7 @@ public class MainActivity extends AppCompatActivity {
 
 		private BluetoothServerSocket mmServerSocket;
 		private InputStream mInput;
+		private OutputStream mOutput;
 
 		AcceptThread() {
 			// Use a temporary object that is later assigned to mmServerSocket
@@ -43,10 +47,13 @@ public class MainActivity extends AppCompatActivity {
 				UUID MY_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
 				Log.d(TAG, String.valueOf(MY_UUID));
 				BluetoothManager bluetoothManager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
+				Log.d(TAG, String.valueOf(bluetoothManager));
 				//BTアダプタ
 				BluetoothAdapter mBluetoothAdapter = bluetoothManager.getAdapter();
+				Log.d(TAG,"BA呼び出し");
 				// MY_UUID is the app's UUID string, also used by the client code.
 				tmp = mBluetoothAdapter.listenUsingRfcommWithServiceRecord("", MY_UUID);
+				Log.d(TAG,"TMP呼び出し");
 
 			} catch (IOException e) {
 				Log.e(TAG, "Socket's listen() method failed", e);
@@ -57,7 +64,9 @@ public class MainActivity extends AppCompatActivity {
 		public void run() {
 			BluetoothSocket socket = null;
 			// Keep listening until exception occurs or a socket is returned.
+			Log.d(TAG,"runだよ");
 			while (true) {
+				Log.d(TAG,"検索中...");
 				try {
 					socket = mmServerSocket.accept();
 					Log.d(TAG, "acceptできたよ");
@@ -65,7 +74,6 @@ public class MainActivity extends AppCompatActivity {
 					Log.e(TAG, "Socket's accept() method failed", e);
 					break;
 				}
-
 				if (socket != null) {
 					try {
 						mInput = socket.getInputStream();
@@ -74,7 +82,14 @@ public class MainActivity extends AppCompatActivity {
 						e.printStackTrace();
 						Log.d(TAG,"manageMyConnectedSocket:"+e);
 					}
-					Log.d(TAG,"認証できたよ");
+					try {
+						mOutput = socket.getOutputStream();
+						Log.d(TAG,"getOutStream呼び出し");
+						send(mOutput);
+					} catch (IOException e) {
+						e.printStackTrace();
+						Log.d(TAG,"manageMyConnectedSocket:"+e);
+					}
 					// A connection was accepted. Perform work associated with
 					// the connection in a separate thread.
 					manageMyConnectedSocket(mInput);
@@ -96,7 +111,7 @@ public class MainActivity extends AppCompatActivity {
 			// InputStreamの読み込み
 			try {
 				bytes = mInput.read(buffer);
-				Log.d(TAG,"inputstream読み込み");
+				Log.d(TAG,"input-stream読み込み");
 				String msg = new String(buffer, 0, bytes);
 				Log.d(TAG, "manageMyConnectedSocket: "+msg);
 			} catch (IOException e) {
@@ -104,6 +119,37 @@ public class MainActivity extends AppCompatActivity {
 				Log.d(TAG,"読み込み失敗"+e);
 			}
 		}
+
+		private void send(OutputStream mOutput) {
+			//文字列を送信する
+			byte[] bytes = {};
+			String str = "sampleから送られたやつだよ！";
+			bytes = str.getBytes();
+			try {
+				mOutput.write(bytes);
+				Log.d(TAG, "送信！");
+			} catch (IOException e) {
+				Log.d(TAG, "送信エラー:" + e);
+				e.printStackTrace();
+			}
+
+		}
+
+		private void send2(OutputStream mOutput) {
+			//文字列を送信する
+			byte[] bytes = {};
+			String str = "sampleから送られたやつだよ2！";
+			bytes = str.getBytes();
+			try {
+				mOutput.write(bytes);
+				Log.d(TAG, "送信！");
+			} catch (IOException e) {
+				Log.d(TAG, "送信エラー:" + e);
+				e.printStackTrace();
+			}
+
+		}
+
 
 		// Closes the connect socket and causes the thread to finish.
 		public void cancel() {
