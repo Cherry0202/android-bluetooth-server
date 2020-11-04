@@ -10,10 +10,14 @@ import android.bluetooth.BluetoothSocket;
 import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
+import android.widget.TextView;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Arrays;
 import java.util.UUID;
 
 public class MainActivity extends AppCompatActivity {
@@ -26,16 +30,24 @@ public class MainActivity extends AppCompatActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
+		Button button = this.findViewById(R.id.button);
 
-		AcceptThread AT = new AcceptThread();
-		AT.run();
+		final AcceptThread AT = new AcceptThread();
+		AT.start();
+		button.setOnClickListener(new View.OnClickListener(){
+			@Override
+			public void onClick(View v) {
+				Log.d("debug", "ここまできたよ！");
+				AT.send2(AT.mOutput);
+			}
+		});
 	}
 
 	private class AcceptThread extends Thread {
 
 		private BluetoothServerSocket mmServerSocket;
 		private InputStream mInput;
-		private OutputStream mOutput;
+		public OutputStream mOutput;
 
 		AcceptThread() {
 			// Use a temporary object that is later assigned to mmServerSocket
@@ -93,11 +105,12 @@ public class MainActivity extends AppCompatActivity {
 					// A connection was accepted. Perform work associated with
 					// the connection in a separate thread.
 					manageMyConnectedSocket(mInput);
-					try {
-						mmServerSocket.close();
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
+//					try {
+//						mmServerSocket.close();
+//						socket.close();
+//					} catch (IOException e) {
+//						e.printStackTrace();
+//					}
 					break;
 				}
 			}
@@ -122,22 +135,21 @@ public class MainActivity extends AppCompatActivity {
 
 		private void send(OutputStream mOutput) {
 			//文字列を送信する
-			byte[] bytes = {};
+			byte[] bytes;
 			String str = "sampleから送られたやつだよ！";
 			bytes = str.getBytes();
 			try {
 				mOutput.write(bytes);
-				Log.d(TAG, "送信！");
+				Log.d(TAG, "送信！"+ Arrays.toString(bytes));
 			} catch (IOException e) {
 				Log.d(TAG, "送信エラー:" + e);
 				e.printStackTrace();
 			}
-
 		}
 
 		private void send2(OutputStream mOutput) {
 			//文字列を送信する
-			byte[] bytes = {};
+			byte[] bytes;
 			String str = "sampleから送られたやつだよ2！";
 			bytes = str.getBytes();
 			try {
@@ -151,14 +163,14 @@ public class MainActivity extends AppCompatActivity {
 		}
 
 
-		// Closes the connect socket and causes the thread to finish.
-		public void cancel() {
-			try {
-				mmServerSocket.close();
-			} catch (IOException e) {
-				Log.e(TAG, "Could not close the connect socket", e);
-			}
-		}
+//		// Closes the connect socket and causes the thread to finish.
+//		public void cancel() {
+//			try {
+//				mmServerSocket.close();
+//			} catch (IOException e) {
+//				Log.e(TAG, "Could not close the connect socket", e);
+//			}
+//		}
 	}
 }
 
