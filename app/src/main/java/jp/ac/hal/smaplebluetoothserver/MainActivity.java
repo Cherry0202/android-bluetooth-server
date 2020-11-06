@@ -40,7 +40,10 @@ public class MainActivity extends AppCompatActivity {
 				AT.send2(mOutput);
 			}
 		});
+		Receiving();
+	}
 
+	private void Receiving() {
 		Runnable looper = new Runnable() {
 			@Override
 			public void run() {
@@ -79,11 +82,14 @@ public class MainActivity extends AppCompatActivity {
 				}
 			}
 		};
-
 		//スレッド起動
 		Thread thread = new Thread(looper);
 		thread.start();
+
 	}
+
+	;
+
 
 	private class AcceptThread extends Thread {
 		private BluetoothServerSocket mmServerSocket;
@@ -141,8 +147,6 @@ public class MainActivity extends AppCompatActivity {
 						e.printStackTrace();
 						Log.d(TAG, "manageMyConnectedSocket:" + e);
 					}
-					// A connection was accepted. Perform work associated with
-					// the connection in a separate thread.
 					manageMyConnectedSocket(mInput);
 					break;
 				}
