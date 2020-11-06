@@ -20,8 +20,9 @@ import java.util.UUID;
 
 public class MainActivity extends AppCompatActivity {
 	private static final String TAG = "debug";
+	private static OutputStream mOutput; //出力ストリーム
+	private static InputStream mInput;
 	private final int REPEAT_INTERVAL = 1000;
-	private OutputStream mOutput; //出力ストリーム
 	private boolean isRepeat = true;
 
 	@Override
@@ -36,7 +37,7 @@ public class MainActivity extends AppCompatActivity {
 			@Override
 			public void onClick(View v) {
 				Log.d(TAG, "ここまできたよ！");
-				AT.send2(AT.mOutput);
+				AT.send2(mOutput);
 			}
 		});
 
@@ -53,7 +54,7 @@ public class MainActivity extends AppCompatActivity {
 //繰り返し処理
 					while (true) {
 						Log.d(TAG, "受信待機中...");
-						if (AT.mInput != null) {
+						if (mInput != null) {
 							// InputStreamのバッファを格納
 							byte[] buffer = new byte[1024];
 							// 取得したバッファのサイズを格納
@@ -61,7 +62,7 @@ public class MainActivity extends AppCompatActivity {
 							// InputStreamの読み込み
 							try {
 								Log.d(TAG, "sample input-stream読み込み1");
-								bytes = AT.mInput.read(buffer);
+								bytes = mInput.read(buffer);
 								Log.d(TAG, "sample input-stream読み込み2");
 								String msg = new String(buffer, 0, bytes);
 								Log.d(TAG, "sample manageMyConnectedSocket: " + msg);
@@ -85,9 +86,6 @@ public class MainActivity extends AppCompatActivity {
 	}
 
 	private class AcceptThread extends Thread {
-
-		OutputStream mOutput;
-		InputStream mInput;
 		private BluetoothServerSocket mmServerSocket;
 
 		AcceptThread() {
